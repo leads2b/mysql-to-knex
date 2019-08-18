@@ -96,9 +96,9 @@ const processViews = (views, pool, DATABASE) => {
       views.forEach(async (view_name, index) => {
         // Get view definition
         let view_definition = await mysql.getViewCreation(pool, view_name, DATABASE);
-        view_definition = view_definition.replace(/CREATE\sALGORITHM=.*=\`[a-zA-Z]+\`@\`.*\`\sSQL.*VIEW\s/gi, '');
-        const re_db = new RegExp(`\`?${DATABASE}\`?\.`, 'gi'); // removing DATABASE name from views definition
-        view_definition = view_definition.replace(re_db, '');
+        view_definition = view_definition.replace(/CREATE.*ALGORITHM=.*=\`?[a-zA-Z]+\`?@\`.*\`\sSQL.*VIEW\s/gi, '');
+        const re_db = new RegExp(`([^\w])(${DATABASE})([^\w])`, 'gi'); // removing DATABASE name from views definition
+        view_definition = view_definition.replace(re_db, '$1$3');
         // Generating the knex data to be written
         const migration_data = await generateViewMigration(view_definition, view_name);
         // Creating the files
