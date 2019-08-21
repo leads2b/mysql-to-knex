@@ -272,10 +272,6 @@ const mapKeys = (column, contains_pK, knex_data = '') => {
         }
       }
     }
-    // Unique
-    if (column.COLUMN_KEY === 'UNI') {
-      knex_data += fillIndexData(`table.unique('${column.COLUMN_NAME}')`);
-    }
   }
   return knex_data;
 }
@@ -379,7 +375,7 @@ const handleKFs = (constraint_match, table_name) => {
  * @returns {array} array of table indexes
  */
 const extractIndexesFromTableCreation = function(table_creation) {
-  index_regex = / *(KEY|INDEX) ([^(]*) \(([^\)]*)\),?/g;
+  index_regex = /([\w]*) *(KEY|INDEX) ([^(]*) \(([^\)]*)\),?/g;
 
   const indexes = [];
   do {
@@ -389,13 +385,15 @@ const extractIndexesFromTableCreation = function(table_creation) {
       continue;
     }
 
+    const index_type = found_index[1].replace(/`/g, '').trim();
+
     // Removing ` character from table name
-    const name = found_index[2].replace(/`/g, '').trim();
+    const name = found_index[3].replace(/`/g, '').trim();
 
     // Removing ` character from columns
-    const columns = found_index[3].replace(/`/g, '').trim().split(',');
+    const columns = found_index[4].replace(/`/g, '').trim().split(',');
 
-    indexes.push({ name, columns });
+    indexes.push({ type: index_type, name, columns });
   } while(found_index);
 
   return indexes;
@@ -420,7 +418,7 @@ const mapIndexes = function(table_creation) {
       columnsStr = `'${index.columns[0]}'`; // 'a'
     }
 
-    indexes_data += fillIndexData(`table.index(${columnsStr}, '${index.name}')`);
+    indexes_data += fillIndexData(`table.index(${columnsStr}, '${index.name}'${index.type ? `, '${index.type}'` : ''})`);
   });
 
   return indexes_data;
@@ -477,6 +475,9 @@ const mapCorruptedAutoIncremented = function(table_definition) {
     if (column.EXTRA !== 'auto_increment') {
       return column;
     }
+    if (column.COLUMN_KEY !== 'PRI') {
+      column.not_primary = true;
+    }
 
     column.unsigned = isUnsigned(column);
     column.digits = column.COLUMN_TYPE.replace(/.*\(([0-9]+)\).*/gi, '$1');
@@ -485,7 +486,7 @@ const mapCorruptedAutoIncremented = function(table_definition) {
   });
 
   return mapped.filter((column) => {
-    return column.EXTRA === 'auto_increment' && (column.unsigned === false || column.digits !== 10);
+    return column.EXTRA === 'auto_increment' && (column.not_primary || column.unsigned === false || column.digits !== 10);
   });
 }
 
@@ -495,6 +496,11 @@ const insertIncremetedAdjustments = function(knex_data, table_name, columns) {
     query += ` int${column.digits ? `(${column.digits})` : ''}`;
     query += ` ${column.unsigned ? 'unsigned ' : ''}NOT NULL AUTO_INCREMENT`;
     knex_data += `\n  .raw('${query}')`;
+
+    if (column.not_primary) {
+      const drop_primary_query = `ALTER TABLE \`${table_name}\` DROP PRIMARY KEY;`
+      knex_data += `\n  .raw('${drop_primary_query}')`;
+    }
   });
 
   return knex_data;
