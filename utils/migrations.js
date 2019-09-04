@@ -15,7 +15,7 @@ const addClosing = (knex_data = '') => {
 
 const addTopConstructor = (table_name, structure_type, knex_data = '') => {
   knex_data = knex_data
-    .addCaracters('exports.up = function(knex, Promise) {')
+    .addCaracters('exports.up = function(knex) {')
     .addEndLine()
     .addCaracters('  ')
 
@@ -36,7 +36,7 @@ const addBottomConstructor = (table_view_name, structure_type, knex_data = '') =
     knex_data = knex_data
       .addEndLine()
       .addEndLine()
-      .addCaracters('exports.down = function(knex, Promise) {')
+      .addCaracters('exports.down = function(knex) {')
       .addEndLine()
       .addCaracters('  ');
 
@@ -329,7 +329,7 @@ const handleKFs = (constraint_match, table_name) => {
 
   // Adding exports.up
   knex_data_raw = knex_data_raw
-    .addCaracters('exports.up = function(knex, Promise) {');
+    .addCaracters('exports.up = function(knex) {');
 
   constraints.forEach((constraint, idx) => {
     knex_data_raw = knex_data_raw.addCaracters('\n  ');
@@ -350,7 +350,7 @@ const handleKFs = (constraint_match, table_name) => {
 
   // Adding exports.down
   knex_data_raw = knex_data_raw
-    .addCaracters('exports.down = function(knex, Promise) {');
+    .addCaracters('exports.down = function(knex) {');
 
   constraints.forEach((constraint, idx) => {
     knex_data_raw = knex_data_raw.addCaracters('\n  ');
