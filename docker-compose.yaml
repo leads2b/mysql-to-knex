@@ -1,0 +1,20 @@
+version: '3'
+services:
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASS: ${MYSQL_PASS}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_TABLE: ${MYSQL_TABLE}
+      MYSQL_VIEW: ${MYSQL_VIEW}
+    networks:
+      - local
+
+networks:
+  local:
+    driver: bridge
