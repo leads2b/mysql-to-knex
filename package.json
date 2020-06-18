@@ -13,7 +13,7 @@
   "author": "Leads2b",
   "license": "ISC",
   "dependencies": {
-    "moment": "2.25.1",
+    "moment": "2.27.0",
     "mysql": "2.18.1",
     "winston": "3.2.1",
     "chalk": "4.0.0",
