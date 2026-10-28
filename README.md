@@ -45,8 +45,22 @@ npm start
 ./main.js
 ```
 
+## Tests
+
+```bash
+# Builds migrations from fake information_schema rows, no database needed
+npm test
+```
+
 -------------
 
 ## Output format
 
 > The script will create files with migrations definitions for each table in the defined Database
+
+### Supported column types
+
+* Knex builders: `tinyint`, `smallint`, `mediumint`, `int`, `bigint`, `decimal`, `float`, `double`, `bit`, `char`, `varchar`, `text`, `mediumtext`, `longtext`, `enum`, `json`, `blob`, `binary`, `varbinary`, `date`, `datetime`, `timestamp`, `time` (fractional seconds precision is kept)
+* `table.specificType` with the exact MySQL type, because knex has no builder that works on MySQL for them: `year`, `set`, `tinytext`, `tinyblob`, `mediumblob`, `longblob` and the spatial types (`geometry`, `point`, `linestring`, `polygon`, `multipoint`, `multilinestring`, `multipolygon`, `geometrycollection`, with `SRID` on MySQL 8)
+* Generated columns are added with raw SQL, and `ON UPDATE CURRENT_TIMESTAMP` is kept in the column default
+* Any other type is not converted: the script prints a warning naming the table and the column
