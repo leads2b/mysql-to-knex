@@ -4,7 +4,8 @@
   "description": "Tools to easily migrate MySQL schemas to Knex migration files",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js"
+    "start": "node main.js",
+    "test": "node test/migrations.test.js"
   },
   "repository": {
     "type" : "git",
